@@ -2,8 +2,15 @@
   "name": "lambdas",
   "type": "commonjs",
   "scripts": {
-    "build": "rimraf dist && tsc",
-    "dev": "ts-node src/lambdas/inputReview.ts"
+    "build": "rm -rf dist && tsc",
+    "dev": "ts-node src/lambdas/inputReview.ts",
+    "docker-auth": "aws ecr get-login-password  | docker login --username AWS --password-stdin 901864772846.dkr.ecr.us-east-1.amazonaws.com",
+    "docker-build": "docker build --platform linux/amd64 --provenance=false -t dfs/lambdas .",
+    "docker-tag": "docker tag dfs/lambdas:latest 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest",
+    "docker-push": "docker push 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest",
+    "lambda-update": "aws lambda update-function-code --no-cli-pager --function-name dfs-presignup --image-uri 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest && aws lambda update-function-code --no-cli-pager --function-name dfs-input-review --image-uri 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest && aws lambda update-function-code --no-cli-pager --function-name dfs-simulation --image-uri 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest && aws lambda update-function-code --no-cli-pager --function-name dfs-history --image-uri 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest ",
+    "lambda-wait": "aws lambda wait function-updated --function-name dfs-presignup && aws lambda wait function-updated --function-name dfs-input-review && aws lambda wait function-updated --function-name dfs-simulation && aws lambda wait function-updated --function-name dfs-history ",
+    "deploy": "npm run build && npm run docker-auth && npm run docker-build && npm run docker-tag && npm run docker-push && npm run lambda-update && npm run lambda-wait && echo 'Deploy complete!'"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.161",

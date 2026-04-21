@@ -8,8 +8,6 @@ const client = new BedrockRuntimeClient({
 });
 
 const MODEL_ID = "openai.gpt-oss-120b-1:0";
-const GUARDRAIL_ID = process.env.BEDROCK_GUARDRAIL_ID!;
-const GUARDRAIL_VERSION = process.env.BEDROCK_GUARDRAIL_VERSION!;
 
 type BedrockMessage = {
   role: "user" | "assistant";
@@ -20,6 +18,7 @@ export async function invokeBedrock(
   systemPrompt: string,
   userMessage: string,
   maxTokens = 4096,
+  temperature = 0.7,
 ): Promise<string> {
   const messages: BedrockMessage[] = [{ role: "user", content: userMessage }];
 
@@ -27,8 +26,21 @@ export async function invokeBedrock(
   const payload = {
     model: MODEL_ID,
     messages: [{ role: "system", content: systemPrompt }, ...messages],
-    max_tokens: maxTokens,
+    max_completion_tokens: maxTokens,
+    temperature: temperature,
   };
+
+  const GUARDRAIL_ID = process.env.BEDROCK_GUARDRAIL_ID;
+  const GUARDRAIL_VERSION = process.env.BEDROCK_GUARDRAIL_VERSION;
+  if (!GUARDRAIL_ID || !GUARDRAIL_VERSION) {
+    throw new Error(
+      "BEDROCK_GUARDRAIL_ID and BEDROCK_GUARDRAIL_VERSION must be set",
+    );
+  }
+
+  console.log(
+    `Bedrock guardrail id and version: ${GUARDRAIL_ID}, ${GUARDRAIL_VERSION}`,
+  );
 
   const command = new InvokeModelCommand({
     modelId: MODEL_ID,
@@ -36,6 +48,7 @@ export async function invokeBedrock(
     accept: "application/json",
     guardrailIdentifier: GUARDRAIL_ID,
     guardrailVersion: GUARDRAIL_VERSION,
+    trace: "ENABLED",
     body: JSON.stringify(payload),
   });
 

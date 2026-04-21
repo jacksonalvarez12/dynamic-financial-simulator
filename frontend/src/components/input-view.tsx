@@ -17,7 +17,8 @@ const MAX_REVIEW_ATTEMPTS = 3;
 
 export const InputView = ({
   simulationId,
-  initialInput = "",
+  initialInput = "I'm 24, have 27,000 in savings (Roth IRA), and am planning to retire when im 57. I plan on putting 1500 a month in the ira, and withdrawing 4% annually in retirement. Assume 9% market returns",
+  // initialInput = "",
   onSimulateSuccess,
 }: Props) => {
   const [input, setInput] = useState(initialInput);

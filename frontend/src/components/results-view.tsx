@@ -1,7 +1,7 @@
 import type { SimulationEntry } from "../types";
-import { CodePanel } from "./CodePanel";
-import { GraphPanel } from "./GraphPanel";
-import { ReportPanel } from "./ReportPanel";
+import { CodePanel } from "./code-panel";
+import { GraphPanel } from "./graph-panel";
+import { ReportPanel } from "./report-panel";
 
 interface Props {
   simulation: SimulationEntry;

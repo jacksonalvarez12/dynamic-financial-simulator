@@ -1,5 +1,5 @@
 import type { SimulationEntry } from "../types";
-import { SimulationCard } from "./SimulationCard";
+import { SimulationCard } from "./simulation-card";
 
 interface Props {
   simulations: SimulationEntry[];

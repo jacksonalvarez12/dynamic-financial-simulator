@@ -8,7 +8,7 @@ import {
   YAxis,
 } from "recharts";
 import type { FinanceState } from "../types";
-import { BucketChart } from "./BucketChart";
+import { BucketChart } from "./bucket-chart";
 
 interface Props {
   data: FinanceState[];

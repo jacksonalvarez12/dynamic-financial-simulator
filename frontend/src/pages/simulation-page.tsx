@@ -1,20 +1,17 @@
-import type { AuthUser } from "aws-amplify/auth";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { InputView } from "../components/InputView";
-import { ResultsView } from "../components/ResultsView";
-import { Sidebar } from "../components/Sidebar";
+import { InputView } from "../components/input-view";
+import { ResultsView } from "../components/results-view";
+import { Sidebar } from "../components/sidebar";
 import type { SimulationEntry, SimulationHistory } from "../types";
 
 interface Props {
-  user: AuthUser;
   onSignOut: () => void;
   history: SimulationHistory;
   setHistory: (h: SimulationHistory) => void;
 }
 
 export const SimulationPage = ({
-  user: _user,
   onSignOut: _onSignOut,
   history,
   setHistory,

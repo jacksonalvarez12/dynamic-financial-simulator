@@ -8,38 +8,65 @@ const authHeader = async (): Promise<string> => {
 };
 
 export const getHistory = async (): Promise<SimulationHistory> => {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/history`, {
-    headers: { Authorization: await authHeader() },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/history`, {
+      headers: { Authorization: await authHeader() },
+    });
+    const body = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}, ${JSON.stringify(body, null, 2)}`);
+    }
+    return body;
+  } catch (err) {
+    console.error(err);
+    throw Error();
+  }
 };
 
 export const renameSimulation = async (
   simulationId: string,
   simulationName: string,
 ): Promise<void> => {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/history/${simulationId}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: await authHeader(),
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/history/${simulationId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: await authHeader(),
+        },
+        body: JSON.stringify({ simulationName }),
       },
-      body: JSON.stringify({ simulationName }),
-    },
-  );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    );
+    const body = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}, ${JSON.stringify(body, null, 2)}`);
+    }
+  } catch (err) {
+    console.error(err);
+    throw Error();
+  }
 };
 
 export const deleteSimulation = async (simulationId: string): Promise<void> => {
-  const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/history/${simulationId}`,
-    {
-      method: "DELETE",
-      headers: { Authorization: await authHeader() },
-    },
-  );
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/history/${simulationId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: await authHeader() },
+      },
+    );
+    const body = await res.json();
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}, ${JSON.stringify(body, null, 2)}`);
+    }
+  } catch (err) {
+    console.error(err);
+    throw Error();
+  }
 };

@@ -8,11 +8,11 @@ import {
 } from "react-router-dom";
 import "./amplify.config";
 import { getHistory } from "./api/history";
-import { useAuth } from "./hooks/useAuth";
-import { CallbackPage } from "./pages/CallbackPage";
-import { LoginPage } from "./pages/LoginPage";
-import { SimulationListPage } from "./pages/SimulationListPage";
-import { SimulationPage } from "./pages/SimulationPage";
+import { useAuth } from "./hooks/use-auth";
+import { CallbackPage } from "./pages/callback-page";
+import { LoginPage } from "./pages/login-page";
+import { SimulationListPage } from "./pages/simulation-list-page";
+import { SimulationPage } from "./pages/simulation-page";
 import type { SimulationHistory } from "./types";
 
 const AppContent = () => {
@@ -57,7 +57,6 @@ const AppContent = () => {
         path="/simulations"
         element={
           <SimulationListPage
-            user={user}
             onSignOut={signOut}
             history={history}
             setHistory={setHistory}
@@ -68,7 +67,6 @@ const AppContent = () => {
         path="/simulations/:simulationId"
         element={
           <SimulationPage
-            user={user}
             onSignOut={signOut}
             history={history}
             setHistory={setHistory}

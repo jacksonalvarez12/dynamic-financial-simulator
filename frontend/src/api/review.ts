@@ -4,18 +4,27 @@ import type { ReviewResponse } from "../types";
 export const reviewInput = async (
   financialInput: string,
 ): Promise<ReviewResponse> => {
-  const session = await fetchAuthSession();
-  const token = session.tokens?.idToken?.toString();
+  try {
+    const session = await fetchAuthSession();
+    const token = session.tokens?.idToken?.toString();
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ financialInput }),
-  });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ financialInput }),
+    });
 
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+    const body = await res.json();
+
+    if (!res.ok) {
+      throw Error(`HTTP ${res.status}, ${JSON.stringify(body, null, 2)}`);
+    }
+    return body;
+  } catch (err) {
+    console.error(err);
+    throw Error();
+  }
 };

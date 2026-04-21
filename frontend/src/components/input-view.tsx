@@ -2,7 +2,7 @@ import { useState } from "react";
 import { reviewInput } from "../api/review";
 import { runSimulation } from "../api/simulate";
 import type { SimulationEntry } from "../types";
-import { LoadingView } from "./LoadingView";
+import { LoadingView } from "./loading-view";
 
 interface Props {
   simulationId: string;

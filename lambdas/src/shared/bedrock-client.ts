@@ -77,3 +77,16 @@ export function parseLLMJson<T>(raw: string): T {
 
   return JSON.parse(stripped) as T;
 }
+
+export function parseLLMString(raw: string): string {
+  const stripped = raw
+    .trim()
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, "")
+    .trim()
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  return stripped;
+}

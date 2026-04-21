@@ -4,9 +4,10 @@ import { SimulationCard } from "./simulation-card";
 interface Props {
   simulations: SimulationEntry[];
   onSelect: (id: string) => void;
+  onRename?: (id: string, newName: string) => void;
 }
 
-export const SimulationGrid = ({ simulations, onSelect }: Props) => {
+export const SimulationGrid = ({ simulations, onSelect, onRename }: Props) => {
   const sorted = [...simulations].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
@@ -29,6 +30,7 @@ export const SimulationGrid = ({ simulations, onSelect }: Props) => {
           key={sim.id}
           simulation={sim}
           onClick={() => onSelect(sim.id)}
+          onRename={onRename ? (name) => onRename(sim.id, name) : undefined}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
+import { renameSimulation } from "../api/history";
 import { InputView } from "../components/input-view";
 import { SimulationGrid } from "../components/simulation-grid";
 import type { SimulationEntry, SimulationHistory } from "../types";
@@ -17,13 +18,24 @@ export const SimulationListPage = ({
   setHistory,
 }: Props) => {
   const navigate = useNavigate();
-  const [showInput, setShowInput] = useState(false);
+  const location = useLocation();
+  const [showInput, setShowInput] = useState(() => !!location.state?.openNew);
   // Stable per-session ID for the "new simulation" slot; resets if user cancels and re-opens
   const [newSimulationId] = useState(() => uuidv4());
 
   const handleSimulateSuccess = (entry: SimulationEntry) => {
     setHistory({ simulations: [entry, ...history.simulations] });
     navigate(`/simulations/${entry.id}`);
+  };
+
+  const handleRename = async (id: string, newName: string) => {
+    const prev = history.simulations;
+    setHistory({ simulations: prev.map((s) => s.id === id ? { ...s, simulationName: newName } : s) });
+    try {
+      await renameSimulation(id, newName);
+    } catch {
+      setHistory({ simulations: prev });
+    }
   };
 
   return (
@@ -55,6 +67,7 @@ export const SimulationListPage = ({
             <SimulationGrid
               simulations={history.simulations}
               onSelect={(id) => navigate(`/simulations/${id}`)}
+              onRename={handleRename}
             />
           </>
         ) : (

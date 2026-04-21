@@ -3,20 +3,23 @@ import {
   APIGatewayProxyResultV2,
 } from "aws-lambda";
 import { VM } from "vm2";
-import { v4 as uuidv4 } from "uuid";
-import { invokeBedrock, parseLLMJson } from "../shared/bedrock-client";
+import {
+  invokeBedrock,
+  parseLLMJson,
+  parseLLMString,
+} from "../shared/bedrock-client";
 import { getHistory, putHistory } from "../shared/s3-client";
 import {
-  simulateRequestSchema,
   codeGenResponseSchema,
   financeStateSchema,
+  simulateRequestSchema,
 } from "../shared/schemas";
 import {
-  FinanceState,
   CodeGenLLMResponse,
+  FinanceState,
+  SimulateRequest,
   SimulateResponse,
   SimulationEntry,
-  SimulateRequest,
 } from "../shared/types";
 
 // ------------------------------------------------------------------ prompts
@@ -50,7 +53,8 @@ Write a clear plain-English report (400-800 words) covering:
 - Any months where finances look stressed or go negative
 - Specific comments on any goals or concerns the user mentioned
 
-Be direct and specific — reference actual months and figures from the simulation data where relevant.`;
+Be direct and specific — reference actual months and figures from the simulation data where relevant.
+Use Markdown for formatting.`;
 
 // ------------------------------------------------------------------ helpers
 
@@ -168,11 +172,12 @@ Simulation data (monthly snapshots):
 ${JSON.stringify(simulationData, null, 2)}
     `.trim();
 
-    const report = await invokeBedrock(
+    const reportRaw = await invokeBedrock(
       REPORT_SYSTEM_PROMPT,
       reportUserMessage,
       2048,
     );
+    const report: string = parseLLMString(reportRaw);
 
     // --- Step 4: Persist to S3 ---
     const entry: SimulationEntry = {

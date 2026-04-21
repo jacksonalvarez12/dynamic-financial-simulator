@@ -11,9 +11,7 @@ interface Props {
   onCancel?: () => void;
 }
 
-type Phase = "idle" | "reviewing" | "questions" | "simulating" | "error";
-
-const MAX_REVIEW_ATTEMPTS = 3;
+type Phase = "idle" | "reviewing" | "reviewed" | "questions" | "simulating" | "error";
 
 export const InputView = ({
   simulationId,
@@ -24,18 +22,40 @@ export const InputView = ({
   const [input, setInput] = useState(initialInput);
   const [phase, setPhase] = useState<Phase>("idle");
   const [questions, setQuestions] = useState<string[]>([]);
-  const [reviewAttempts, setReviewAttempts] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const simulate = async (approvedInput: string) => {
-    setPhase("simulating");
+  const inFlight = phase === "reviewing" || phase === "simulating";
+
+  const handleReview = async () => {
+    const text = input.trim();
+    setPhase("reviewing");
+    setErrorMessage("");
     try {
-      const response = await runSimulation(approvedInput, simulationId);
+      const result = await reviewInput(text);
+      if (result.status === "approved") {
+        setQuestions([]);
+        setPhase("reviewed");
+      } else {
+        setQuestions(result.questions ?? []);
+        setPhase("questions");
+      }
+    } catch {
+      setErrorMessage("Review failed. Please check your connection and try again.");
+      setPhase("error");
+    }
+  };
+
+  const handleSimulate = async () => {
+    const text = input.trim();
+    setPhase("simulating");
+    setErrorMessage("");
+    try {
+      const response = await runSimulation(text, simulationId);
       const entry: SimulationEntry = {
         id: simulationId,
         simulationName: `Simulation — ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
         createdAt: new Date().toISOString(),
-        input: approvedInput,
+        input: text,
         simulationData: response.simulationData,
         report: response.report,
         simulationStepCode: response.simulationStepCode,
@@ -47,38 +67,9 @@ export const InputView = ({
     }
   };
 
-  const submit = async () => {
-    const text = input.trim();
-
-    if (reviewAttempts >= MAX_REVIEW_ATTEMPTS) {
-      await simulate(text);
-      return;
-    }
-
-    setPhase("reviewing");
-    try {
-      const result = await reviewInput(text);
-      if (result.status === "approved") {
-        await simulate(text);
-      } else {
-        setQuestions(result.questions ?? []);
-        setReviewAttempts((n) => n + 1);
-        setPhase("questions");
-      }
-    } catch {
-      setErrorMessage(
-        "Review failed. Please check your connection and try again.",
-      );
-      setPhase("error");
-    }
-  };
-
   if (phase === "simulating") {
     return <LoadingView />;
   }
-
-  const attemptsRemaining = MAX_REVIEW_ATTEMPTS - reviewAttempts;
-  const forceMode = reviewAttempts >= MAX_REVIEW_ATTEMPTS;
 
   return (
     <div className="space-y-5">
@@ -86,12 +77,6 @@ export const InputView = ({
         <div className="bg-gray-900 border border-yellow-800/50 rounded-xl p-4 space-y-2">
           <p className="text-sm font-medium text-yellow-400">
             A few things need clarification
-            {attemptsRemaining > 0 && (
-              <span className="text-yellow-600 font-normal ml-2">
-                ({attemptsRemaining} attempt{attemptsRemaining !== 1 ? "s" : ""}{" "}
-                remaining before forced proceed)
-              </span>
-            )}
           </p>
           <ul className="space-y-1.5">
             {questions.map((q, i) => (
@@ -104,11 +89,10 @@ export const InputView = ({
         </div>
       )}
 
-      {forceMode && (
-        <div className="bg-gray-900 border border-blue-800/50 rounded-xl p-3">
-          <p className="text-sm text-blue-400">
-            Maximum review attempts reached — your input will be sent to
-            simulation as-is.
+      {phase === "reviewed" && (
+        <div className="bg-gray-900 border border-green-800/50 rounded-xl p-3">
+          <p className="text-sm text-green-400">
+            Input looks good — ready to simulate.
           </p>
         </div>
       )}
@@ -126,26 +110,29 @@ export const InputView = ({
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          disabled={phase === "reviewing"}
+          disabled={inFlight}
           placeholder="e.g. I'm 28, earn $95k/year, max my 401k, rent for $1800/month, have $20k in savings, and plan to buy a home in 5 years..."
           rows={10}
           className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 resize-none focus:outline-none focus:border-gray-500 disabled:opacity-50 transition-colors"
         />
       </div>
 
-      <button
-        onClick={submit}
-        disabled={!input.trim() || phase === "reviewing"}
-        className="w-full bg-white text-gray-900 font-medium py-2.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
-      >
-        {phase === "reviewing"
-          ? "Reviewing…"
-          : forceMode
-            ? "Run Simulation"
-            : phase === "questions"
-              ? "Resubmit"
-              : "Submit"}
-      </button>
+      <div className="flex gap-3">
+        <button
+          onClick={handleReview}
+          disabled={!input.trim() || inFlight}
+          className="flex-1 bg-gray-800 text-white font-medium py-2.5 rounded-lg hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm border border-gray-700"
+        >
+          {phase === "reviewing" ? "Reviewing…" : "Review"}
+        </button>
+        <button
+          onClick={handleSimulate}
+          disabled={!input.trim() || inFlight}
+          className="flex-1 bg-white text-gray-900 font-medium py-2.5 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm"
+        >
+          Simulate
+        </button>
+      </div>
     </div>
   );
 };

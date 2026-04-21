@@ -40,7 +40,7 @@ export const SimulationPage = ({
         history={history}
         setHistory={setHistory}
         currentSimulationId={simulationId}
-        onNewSimulation={() => navigate("/simulations")}
+        onNewSimulation={() => navigate("/simulations", { state: { openNew: true } })}
       />
 
       <main className="flex-1 overflow-y-auto">

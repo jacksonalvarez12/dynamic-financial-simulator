@@ -97,7 +97,14 @@ export const Sidebar = ({
 
   return (
     <aside className="w-60 flex-shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col h-full">
-      <div className="p-3 border-b border-gray-800">
+      <div className="p-3 border-b border-gray-800 flex flex-col gap-1">
+        <button
+          onClick={() => navigate("/simulations")}
+          className="w-full text-left text-sm text-gray-400 hover:text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
+        >
+          <span>⌂</span>
+          <span>Home</span>
+        </button>
         <button
           onClick={onNewSimulation}
           className="w-full text-left text-sm text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
@@ -156,13 +163,22 @@ export const Sidebar = ({
               </div>
 
               {!isEditing && (
-                <button
-                  onClick={(e) => handleDelete(sim.id, e)}
-                  className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition-all text-xs px-1"
-                  title="Delete"
-                >
-                  ✕
-                </button>
+                <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 transition-all">
+                  <button
+                    onClick={(e) => startRename(sim.id, sim.simulationName, e)}
+                    className="text-gray-500 hover:text-gray-200 transition-colors text-xs px-1 py-0.5 rounded"
+                    title="Rename"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(sim.id, e)}
+                    className="text-gray-500 hover:text-red-400 transition-colors text-xs px-1 py-0.5 rounded"
+                    title="Delete"
+                  >
+                    ✕
+                  </button>
+                </div>
               )}
             </div>
           );

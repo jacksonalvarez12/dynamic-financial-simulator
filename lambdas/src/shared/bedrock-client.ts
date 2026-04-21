@@ -48,11 +48,14 @@ export async function invokeBedrock(
     throw new Error("Bedrock returned an empty response");
   }
 
+  console.log("Bedrock response:", text);
   return text;
 }
 
 export function parseLLMJson<T>(raw: string): T {
   const stripped = raw
+    .trim()
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, "")
     .trim()
     .replace(/^```json\s*/i, "")
     .replace(/^```\s*/i, "")

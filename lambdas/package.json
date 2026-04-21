@@ -3,7 +3,7 @@
   "type": "commonjs",
   "scripts": {
     "build": "rm -rf dist && tsc",
-    "dev": "ts-node src/lambdas/inputReview.ts",
+    "local": "ts-node src/lambdas/local.ts",
     "docker-auth": "aws ecr get-login-password  | docker login --username AWS --password-stdin 901864772846.dkr.ecr.us-east-1.amazonaws.com",
     "docker-build": "docker build --platform linux/amd64 --provenance=false -t dfs/lambdas .",
     "docker-tag": "docker tag dfs/lambdas:latest 901864772846.dkr.ecr.us-east-1.amazonaws.com/dfs/lambdas:latest",
